@@ -1,0 +1,17 @@
+{
+  "name": "solveboggle",
+  "author": "Michael Weiss",
+  "description": "Script to solve the 538 boggle challenge",
+  "keywords": [
+    "boggle",
+    "538"
+  ],
+  "contibutors": [],
+  "dependencies": {
+    "triejs": ""
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}
