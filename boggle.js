@@ -26,6 +26,9 @@ function randomNumber(i) {
   return Math.floor(Math.random() * i);
 }
 
+/**
+ *  Returns a frequency map of words.
+ */
 function frequencyMap(words) {
   var frequencyMap = {};
 
@@ -66,6 +69,9 @@ function frequencyMap(words) {
   return frequencyMap;
 }
 
+/**
+ * Generates a board with the frequencyMap of 2 and 3 letter combinations as a heuristic.
+ */
 function generateBoard(frequencyMap) {
   var board = [
     [null, null, null, null],
@@ -167,6 +173,9 @@ function generateBoard(frequencyMap) {
   return board;
 }
 
+/**
+ *  Finds all the words on the board.
+ */
 function findAllWords(trie, board) {
   var words = {};
 
@@ -249,8 +258,41 @@ function scoreWords(words) {
   return sum;
 }
 
-// Create a trie
-// From the trie, incrementally
+/**
+ * For each letter on the board, try changing it to a different letter and see
+ * if the score for that board goes up.  If it does, then we use that board.  If not,
+ * then we keep going until we've tried each tile.  Finally, we return true if we
+ * successfully optimized the board in some way, and false if we were unsuccsessful.
+ */
+function optimizeBoard(trie, board) {
+  var currentScore = scoreWords(findAllWords(trie, board));
+  var beforeOptimizeScore = currentScore;
+  for (var i = 0; i < boardSize; i += 1) {
+    for (var j = 0; j < boardSize; j += 1) {
+      for (var c = 97; c <= 122; c += 1) {
+        var oldLetter = board[i][j];
+        var letter = String.fromCharCode(c);
+        board[i][j] = letter;
+        var newScore = scoreWords(findAllWords(trie, board));
+        if (newScore > currentScore) {
+          currentScore = newScore;
+        }
+        else {
+          board[i][j] = oldLetter;
+        }
+      }
+    }
+  }
+  return beforeOptimizeScore !== currentScore;
+}
+
+
+/**
+ * Read all the words and then forever do the following:
+ *    Generate a random board
+ *    Optimize that board
+ *    If it's better than the previously generated board, print it out.
+ */
 fs.readFile('enable1.txt', 'utf8', function (err,data) {
   var words = data.split("\r\n");
   var trie = new Triejs();
@@ -261,8 +303,12 @@ fs.readFile('enable1.txt', 'utf8', function (err,data) {
 
   while (true) {
     board = generateBoard(fm);
+    while (optimizeBoard(trie, board)) {
+      // Keep optimizing that board until it's hit its local max
+    }
     boardWords = findAllWords(trie, board);
     score = scoreWords(boardWords);
+
     if (score > maxScore) {
       maxScore = score;
       console.log('-------------------------')
